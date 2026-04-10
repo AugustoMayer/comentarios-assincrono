@@ -7,6 +7,17 @@ const comments = ref([])
 const newAuthor = ref('')
 const newContent = ref('')
 
+const formatDate = (dateString) => {
+  const date = new Date(dateString)
+  return new Intl.DateTimeFormat('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(date)
+}
+
 // Busca os comentários na API do Rails
 const fetchComments = async () => {
   try {
@@ -146,18 +157,21 @@ onMounted(() => {
       <h4>Comentários ({{ comments.length }})</h4>
       
       <div v-for="comment in comments" :key="comment.id" class="comment-item" style="position: relative;">
-        <strong>{{ comment.author }}</strong>
+        <div style="display: flex; flex-direction: column;">
+          <strong>{{ comment.author }}</strong>
+          <span style="font-size: 0.75rem; color: #888;">{{ formatDate(comment.created_at) }}</span>
+        </div>
         <p style="margin-top: 5px; color: #333;">{{ comment.content }}</p>
         
-        <button 
-          @click="deleteComment(comment.id)" 
+        <button
+          @click="deleteComment(comment.id)"
           style="position: absolute; top: 10px; right: 10px; background: none; border: none; color: #ff4c4c; font-weight: bold; cursor: pointer;"
           title="Excluir Comentário">
           X
         </button>
       </div>
       
-      <p v-if="comments.length === 0" style="color: #666; font-style: italic;">
+      <p v-if="comments.length === 0" style="color: #DDD; font-style: italic;">
         Seja o primeiro a comentar!
       </p>
 
