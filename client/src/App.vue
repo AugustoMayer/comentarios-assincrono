@@ -30,9 +30,6 @@ const createComment = async () => {
   })
 
   if (response.ok) {
-    const comment = await response.json()
-    // Adiciona o novo comentário no topo da lista localmente
-    comments.value.unshift(comment) 
     
     // Limpa o formulário
     newAuthor.value = ''
@@ -59,23 +56,95 @@ onMounted(() => {
 })
 </script>
 
+<style scoped>
+/* Container principal para centralizar e dar respiro */
+.main-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* O Wrapper mágico: coloca publicação e form lado a lado */
+.post-wrapper {
+  display: flex; /* Ativa o Flexbox */
+  flex-direction: row; /* Coloca os itens na mesma linha (padrão) */
+  gap: 20px; /* Dá um espaço entre a publicação e o formulário */
+  margin-bottom: 30px; /* Separa da lista de comentários */
+}
+
+/* Estilo para a caixa da publicação */
+.publication-box {
+  flex: 2; /* Faz esta caixa ocupar 2/3 do espaço disponível */
+  border: 1px solid; /* Cria o efeito de caixa */
+  padding: 20px;
+  border-radius: 8px; /* Cantos arredondados conceitual */
+}
+
+/* Estilo para a caixa do formulário */
+.form-box {
+  flex: 1; /* Faz esta caixa ocupar 1/3 do espaço disponível */
+  border: 1px solid; /* Cria o efeito de caixa */
+  padding: 20px;
+  border-radius: 8px; /* Cantos arredondados conceitual */
+  display: flex; /* Opcional: Flexbox interno para alinhar os inputs */
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Estilo para a lista de comentários embaixo */
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Estilo para cada item de comentário individual */
+.comment-item {
+  border: 1px solid;
+  padding: 15px;
+  border-radius: 5px;
+}
+</style>
+
 <template>
-  <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: sans-serif;">
+  <div class="main-container">
     <h2>Sistema de Comentários</h2>
 
-    <form @submit.prevent="createComment" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 30px;">
-      <input v-model="newAuthor" placeholder="Seu nome" required style="padding: 8px;" />
-      <textarea v-model="newContent" placeholder="Escreva seu comentário..." required style="padding: 8px; height: 80px;"></textarea>
-      <button type="submit" style="padding: 10px; background-color: #42b883; color: white; border: none; cursor: pointer;">
-        Enviar Comentário
-      </button>
-    </form>
-
-    <div style="display: flex; flex-direction: column; gap: 15px;">
-      <div v-for="comment in comments" :key="comment.id" style="border: 1px solid #ddd; padding: 15px; border-radius: 5px;">
-        <strong>{{ comment.author }}</strong>
-        <p style="margin: 5px 0 0 0;">{{ comment.content }}</p>
+    <div class="post-wrapper">
+      
+      <div class="publication-box">
+        <h3>Artemis II</h3>
+        <img src="/img.jpg" alt="Imagem da publicação" style="max-width: 100%; border-radius: 4px;">
       </div>
+
+      <div class="form-box">
+        <h4>Deixe seu comentário</h4>
+        <form @submit.prevent="createComment" style="display: flex; flex-direction: column; gap: 10px;">
+          
+          <input v-model="newAuthor" placeholder="Seu nome" required style="padding: 8px; border-radius: 4px; border: 1px solid #ccc;"/>
+          
+          <textarea v-model="newContent" placeholder="Escreva seu comentário..." required style="padding: 8px; border-radius: 4px; border: 1px solid #ccc; height: 100px; resize: vertical;"></textarea>
+          
+          <button type="submit" style="padding: 10px; border-radius: 4px; border: none; background-color: #42b883; color: white; font-weight: bold; cursor: pointer;">
+            Enviar Comentário
+          </button>
+        </form>
+      </div>
+
+    </div> 
+
+    <div class="comments-list">
+      <h4>Comentários ({{ comments.length }})</h4>
+      
+      <div v-for="comment in comments" :key="comment.id" class="comment-item">
+        <strong>{{ comment.author }}</strong>
+        <p style="margin-top: 5px; color: #333;">{{ comment.content }}</p>
+      </div>
+      
+      <p v-if="comments.length === 0" style="color: #666; font-style: italic;">
+        Seja o primeiro a comentar!
+      </p>
+
     </div>
   </div>
 </template>
