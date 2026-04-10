@@ -7,6 +7,7 @@ class CommentsController < ApplicationController
   def create
     @comment = Comment.new(comment_params)
     if @comment.save
+      ActionCable.server.broadcast("comments_channel", @comment)
       render json: @comment, status: :created
     else
       render json: @comment.errors, status: :unprocessable_entity

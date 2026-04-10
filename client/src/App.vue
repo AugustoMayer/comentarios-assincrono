@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import { createConsumer } from '@rails/actioncable' // Importa o Action Cable para comunicação em tempo real
 
 // Variáveis reativas
 const comments = ref([])
@@ -42,6 +43,19 @@ const createComment = async () => {
 // Executa a busca assim que a tela carrega
 onMounted(() => {
   fetchComments()
+
+  // Conecta ao WebSocket do Rails
+  const cable = createConsumer('ws://localhost:3000/cable')
+
+  cable.subscriptions.create("CommentsChannel", {
+    received(data) {
+      // Quando receber um dado novo pelo socket, coloca na lista
+      // Verificamos se já não está na lista para evitar duplicados
+      if (!comments.value.find(c => c.id === data.id)) {
+        comments.value.unshift(data)
+      }
+    }
+  })
 })
 </script>
 
