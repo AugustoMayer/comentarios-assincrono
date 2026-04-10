@@ -1,6 +1,7 @@
 class CommentsController < ApplicationController
+
   def index
-    @comments = Comment.order(created_at: :desc)
+    @comments = Comment.where(is_active: true).order(created_at: :desc)
     render json: @comments
   end
 
@@ -11,6 +12,14 @@ class CommentsController < ApplicationController
       render json: @comment, status: :created
     else
       render json: @comment.errors, status: :unprocessable_entity
+    end
+  end
+
+  def destroy
+    @comment = Comment.find(params[:id])
+    if @comment.update(is_active: false)
+      ActionCable.server.broadcast("comments_channel", { deleted: true, id: @comment.id })
+    render json:{ message: "Comment deactivated successfully" }, status: :ok
     end
   end
 
