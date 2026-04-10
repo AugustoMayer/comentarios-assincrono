@@ -37,23 +37,32 @@ const createComment = async () => {
   }
 }
 
+const deleteComment = async (id) => {
+  await fetch(`http://localhost:3000/comments/${id}`, {
+    method: 'DELETE'
+  })
+}
+
 // Executa a busca assim que a tela carrega
 onMounted(() => {
   fetchComments()
-
-  // Conecta ao WebSocket do Rails
   const cable = createConsumer('ws://localhost:3000/cable')
 
   cable.subscriptions.create("CommentsChannel", {
     received(data) {
-      // Quando receber um dado novo pelo socket, coloca na lista
-      // Verificamos se já não está na lista para evitar duplicados
-      if (!comments.value.find(c => c.id === data.id)) {
-        comments.value.unshift(data)
+      if (data.deleted) {
+        // Remove o comentário da lista se for uma notificação de exclusão
+        comments.value = comments.value.filter(c => c.id !== data.id)
+      } else {
+        // Adiciona ou atualiza o comentário na lista
+        if (!comments.value.find(c => c.id === data.id)) {
+          comments.value.unshift(data)
+        }
       }
     }
   })
 })
+
 </script>
 
 <style scoped>
@@ -136,9 +145,16 @@ onMounted(() => {
     <div class="comments-list">
       <h4>Comentários ({{ comments.length }})</h4>
       
-      <div v-for="comment in comments" :key="comment.id" class="comment-item">
+      <div v-for="comment in comments" :key="comment.id" class="comment-item" style="position: relative;">
         <strong>{{ comment.author }}</strong>
         <p style="margin-top: 5px; color: #333;">{{ comment.content }}</p>
+        
+        <button 
+          @click="deleteComment(comment.id)" 
+          style="position: absolute; top: 10px; right: 10px; background: none; border: none; color: #ff4c4c; font-weight: bold; cursor: pointer;"
+          title="Excluir Comentário">
+          X
+        </button>
       </div>
       
       <p v-if="comments.length === 0" style="color: #666; font-style: italic;">
